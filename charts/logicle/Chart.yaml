@@ -2,7 +2,7 @@ apiVersion: v2
 name: logicle
 description: Helm chart for deploying Logicle on Kubernetes
 sources:
-  - https://github.com/logicleai/logicle
+  - https://github.com/BruceKhetta/logicle
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -19,8 +19,7 @@ type: application
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 0.1.1
 
-# This is the version number of the application being deployed. This is only a fallback for local
-# `helm package`/`helm lint` runs: the release-chart workflow always overrides it with
-# `--app-version` derived from the triggering release tag, so it never drifts from the actual
-# published image in CI-driven releases.
+# Historical application version for the retained chart sources. Chart publication
+# is disabled in this fork; set appVersion or image.tag to a published fork version
+# before using these sources.
 appVersion: "v0.34.1"

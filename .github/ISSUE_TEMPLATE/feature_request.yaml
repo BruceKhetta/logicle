@@ -51,5 +51,5 @@ body:
     attributes:
       label: "🏢 Code of Conduct Acknowledgement"
       options:
-        - label: "I have read the [Contributing Guidelines](https://github.com/logicleai/logicle/blob/main/CONTRIBUTING.md)"
+        - label: "I have read the [project documentation](https://github.com/BruceKhetta/logicle/blob/main/README.md)"
           required: true

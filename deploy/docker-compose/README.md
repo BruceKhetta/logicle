@@ -1,5 +1,12 @@
 # Logicle Deployment Guide with Docker Compose
 
+## Fork image version
+
+Before starting Compose, set `LOGICLE_IMAGE_TAG` to a published fork image tag,
+for example `0.36.0-nh-1`. The Compose files use `ghcr.io/brucekhetta/logicle`
+and require this value instead of silently selecting an upstream image.
+See [manual releases](../../docs/fork-releases.md).
+
 This document provides a comprehensive guide for deploying Logicle using Docker Compose.
 
 This deployment method packages all necessary components, including the database and storage, required to operate a fully functional Logicle instance.
@@ -37,14 +44,14 @@ Options are available for setups with or without HTTPS reverse proxy and Let's E
 
 | Configuration                     | Command                                                                                                                                                       |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Standard (No HTTPS)                     | `curl -L https://raw.githubusercontent.com/logicleai/logicle/main/deploy/docker-compose/docker-compose-postgres.yml -o docker-compose.yml`           |
-| Secure (With HTTPS reverse proxy)    | `curl -L https://raw.githubusercontent.com/logicleai/logicle/main/deploy/docker-compose/docker-compose-postgres-proxy.yml -o docker-compose.yml`     |
+| Standard (No HTTPS)                     | `curl -L https://raw.githubusercontent.com/BruceKhetta/logicle/main/deploy/docker-compose/docker-compose-postgres.yml -o docker-compose.yml`           |
+| Secure (With HTTPS reverse proxy)    | `curl -L https://raw.githubusercontent.com/BruceKhetta/logicle/main/deploy/docker-compose/docker-compose-postgres-proxy.yml -o docker-compose.yml`     |
 
 ### Step 3: Download the Environment File
 
 Download the `.env` file, which includes necessary configurations for Logicle:
 ```
-curl -L https://raw.githubusercontent.com/logicleai/logicle/main/deploy/docker-compose/.env.postgres.example -o .env
+curl -L https://raw.githubusercontent.com/BruceKhetta/logicle/main/deploy/docker-compose/.env.postgres.example -o .env
 ```
 
 ### Step 4: Configure the .env File
