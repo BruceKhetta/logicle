@@ -5,7 +5,7 @@
 nameOverride: "logicle-ee"
 
 image:
-  repository: "ghcr.io/logicleai/logicle"
+  repository: "ghcr.io/brucekhetta/logicle"
   tag: ""
   pullPolicy: Always
 

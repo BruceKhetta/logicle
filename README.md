@@ -35,7 +35,7 @@ To quickly start using Logicle, you can run it as a Docker container. Use the fo
 ```bash
 docker run -d --name logicle \
 -p 3000:3000 \
-ghcr.io/logicleai/logicle:latest
+ghcr.io/brucekhetta/logicle:latest
 ```
 
 After running the command, access Logicle by navigating to [http://localhost:3000](http://localhost:3000) in your web browser. From there, you can create an account and start exploring its features.
@@ -49,6 +49,13 @@ For detailed instructions on how to deploy Logicle using these methods, please r
 ## Testing
 
 For the project testing strategy and procedure (smoke, integration, and LLM provider coverage), see [TESTING.md](./TESTING.md).
+
+## Fork releases
+
+This fork publishes images and GitHub Releases only through a manual workflow,
+using versions such as `0.36.0-nh-1`. See [Fork CI and manual releases](./docs/fork-releases.md)
+for inputs, test coverage, permissions and manual promotion of an image to `latest`.
+The quick-start image above requires a published fork image promoted to `latest`.
 
 ## Licensing Information
 

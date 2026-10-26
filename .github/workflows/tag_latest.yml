@@ -1,41 +1,49 @@
-name: Promote image to latest
+name: Promote fork image to latest (manual)
+
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Tag to promote (e.g., v1.2.3)"
+        description: 'Published fork image tag (e.g. 0.36.0-nh-1, without v)'
         required: true
+        type: string
+
+concurrency:
+  group: fork-image-latest
+  cancel-in-progress: false
 
 jobs:
   promote:
+    if: github.repository == 'BruceKhetta/logicle'
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
     steps:
+      - name: Validate fork image tag and resolve registry path
+        id: image
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?-nh-[a-z0-9]+([.-][a-z0-9]+)*$ ]] || (( ${#VERSION} > 128 )); then
+            echo 'Expected a fork image tag such as 0.36.0-nh-1 (without v).'
+            exit 1
+          fi
+          echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Promote GHCR image to latest
-        run: |
-          IMAGE_GHCR=ghcr.io/${{ github.repository }}
-          docker pull $IMAGE_GHCR:${{ inputs.version }}
-          docker tag  $IMAGE_GHCR:${{ inputs.version }} $IMAGE_GHCR:latest
-          docker push $IMAGE_GHCR:latest
-
-      - name: Promote Docker Hub image to latest
-        run: |
-          IMAGE_DH=${{ github.repository }}
-          docker pull $IMAGE_DH:${{ inputs.version }}
-          docker tag  $IMAGE_DH:${{ inputs.version }} $IMAGE_DH:latest
-          docker push $IMAGE_DH:latest
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          VERSION: ${{ inputs.version }}
+        run: docker buildx imagetools create --tag "$IMAGE:latest" "$IMAGE:$VERSION"

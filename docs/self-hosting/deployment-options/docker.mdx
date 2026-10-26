@@ -15,7 +15,7 @@ By default, the Docker container uses an embedded SQLite database, so no externa
 # Start Logicle with SQLite, without data persistence
 docker run -d --name logicle \
 -p 3000:3000 \
-ghcr.io/logicleai/logicle:latest
+ghcr.io/brucekhetta/logicle:latest
 ```
 
 After starting, the application will be accessible at http://localhost:3000, where you can create your first user.
@@ -27,7 +27,7 @@ To maintain the SQLite database data between container restarts, you should bind
 docker run -d --name logicle \
 -v "$(pwd)"/logicle:/data/ \
 -p 3000:3000 \
-ghcr.io/logicleai/logicle:latest
+ghcr.io/brucekhetta/logicle:latest
 ```
 
 This command ensures that your data persists across container restarts by storing it in a specified directory on your machine.
