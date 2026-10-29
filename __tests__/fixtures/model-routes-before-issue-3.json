@@ -1,0 +1,667 @@
+[
+  {
+    "provider": "openai",
+    "id": "gpt-5-latest",
+    "model": "gpt-5.6-terra"
+  },
+  {
+    "provider": "openai",
+    "id": "chatgpt-5-latest",
+    "model": "chat-latest"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-3.5-turbo",
+    "model": "gpt-3.5-turbo"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4.1",
+    "model": "gpt-4.1"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4.1-mini",
+    "model": "gpt-4.1-mini"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4.1-nano",
+    "model": "gpt-4.1-nano"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4o",
+    "model": "gpt-4o"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4o-mini",
+    "model": "gpt-4o-mini"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4-turbo",
+    "model": "gpt-4-turbo"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-4",
+    "model": "gpt-4"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5",
+    "model": "gpt-5"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5-mini",
+    "model": "gpt-5-mini"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5-nano",
+    "model": "gpt-5-nano"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5-chat",
+    "model": "gpt-5-chat-latest"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.1",
+    "model": "gpt-5.1"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.1-chat",
+    "model": "gpt-5.1-chat-latest"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.2",
+    "model": "gpt-5.2"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.2-pro",
+    "model": "gpt-5.2-pro"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.4",
+    "model": "gpt-5.4"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.5",
+    "model": "gpt-5.5"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.5-pro",
+    "model": "gpt-5.5-pro"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.6-terra",
+    "model": "gpt-5.6-terra"
+  },
+  {
+    "provider": "openai",
+    "id": "gpt-5.6-luna",
+    "model": "gpt-5.6-luna"
+  },
+  {
+    "provider": "openai",
+    "id": "o1",
+    "model": "o1"
+  },
+  {
+    "provider": "openai",
+    "id": "o1-mini",
+    "model": "o1-mini"
+  },
+  {
+    "provider": "openai",
+    "id": "o3",
+    "model": "o3"
+  },
+  {
+    "provider": "openai",
+    "id": "o3-mini",
+    "model": "o3-mini"
+  },
+  {
+    "provider": "openai",
+    "id": "o3-deep-research",
+    "model": "o3-deep-research"
+  },
+  {
+    "provider": "openai",
+    "id": "o4-mini",
+    "model": "o4-mini"
+  },
+  {
+    "provider": "openai",
+    "id": "o4-mini-deep-research",
+    "model": "o4-mini-deep-research"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-sonnet-latest",
+    "model": "claude-sonnet-5"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-3-opus",
+    "model": "claude-3-opus-latest"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-3-sonnet",
+    "model": "claude-3-sonnet-20240229"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-3-haiku",
+    "model": "claude-3-haiku-20240307"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-3-5-sonnet",
+    "model": "claude-3-5-sonnet-latest"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-3-5-haiku",
+    "model": "claude-3-5-haiku-latest"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-3-7-sonnet",
+    "model": "claude-3-7-sonnet-latest"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-sonnet-4",
+    "model": "claude-sonnet-4-20250514"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-opus-4",
+    "model": "claude-opus-4-20250514"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-opus-4-1",
+    "model": "claude-opus-4-1"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-haiku-4-5",
+    "model": "claude-haiku-4-5"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-sonnet-4-5",
+    "model": "claude-sonnet-4-5"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-opus-4-5",
+    "model": "claude-opus-4-5"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-sonnet-4-6",
+    "model": "claude-sonnet-4-6"
+  },
+  {
+    "provider": "anthropic",
+    "id": "claude-sonnet-5",
+    "model": "claude-sonnet-5"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-pro-latest",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-flash-latest",
+    "model": "gemini-3.7-flash"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-1.5-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-1.5-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-2.0-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-2.0-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-2.0-flash-lite",
+    "model": "gemini-2.5-flash-lite"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-2.5-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-2.5-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-3.0-pro",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-3.1-flash-lite",
+    "model": "gemini-3.1-flash-lite"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-3.1-pro",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-3.5-flash",
+    "model": "gemini-3.5-flash"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-3.6-flash",
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "provider": "gcp-vertex",
+    "id": "gemini-3.7-flash",
+    "model": "gemini-3.7-flash"
+  },
+  {
+    "provider": "perplexity",
+    "id": "sonar-latest",
+    "model": "sonar-pro"
+  },
+  {
+    "provider": "perplexity",
+    "id": "sonar",
+    "model": "sonar"
+  },
+  {
+    "provider": "perplexity",
+    "id": "sonar-pro",
+    "model": "sonar-pro"
+  },
+  {
+    "provider": "perplexity",
+    "id": "sonar-reasoning",
+    "model": "sonar-reasoning"
+  },
+  {
+    "provider": "perplexity",
+    "id": "sonar-reasoning-pro",
+    "model": "sonar-reasoning-pro"
+  },
+  {
+    "provider": "perplexity",
+    "id": "sonar-deep-research",
+    "model": "sonar-deep-research"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-2.5-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-2.5-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-3.0-pro",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-3.1-flash-lite",
+    "model": "gemini-3.1-flash-lite"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-3.1-pro",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-3.5-flash",
+    "model": "gemini-3.5-flash"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-3.6-flash",
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-3.7-flash",
+    "model": "gemini-3.7-flash"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-pro-latest",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "google-ai-studio",
+    "id": "gemini-flash-latest",
+    "model": "gemini-3.7-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5-latest",
+    "model": "gpt-5.6-terra"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-3.5-turbo",
+    "model": "gpt-3.5-turbo"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-4o",
+    "model": "gpt-4o"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-4o-mini",
+    "model": "gpt-4o-mini"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-4.1",
+    "model": "gpt-4.1"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-4.1-mini",
+    "model": "gpt-4.1-mini"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5",
+    "model": "gpt-5"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5-mini",
+    "model": "gpt-5-mini"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5.1",
+    "model": "gpt-5.1"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5.2",
+    "model": "gpt-5.2"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5.4",
+    "model": "gpt-5.4"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gpt-5.6-terra",
+    "model": "gpt-5.6-terra"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "chatgpt-5-latest",
+    "model": "chat-latest"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o1",
+    "model": "o1"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o1-mini",
+    "model": "o1-mini"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o3",
+    "model": "o3"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o3-deep-research",
+    "model": "o3-deep-research"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o3-mini",
+    "model": "o3-mini"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o4-mini",
+    "model": "o4-mini"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "o4-mini-deep-research",
+    "model": "o4-mini-deep-research"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-3-sonnet",
+    "model": "claude-3-sonnet-20240229"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-3-haiku",
+    "model": "claude-3-haiku-20240307"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-3-5-sonnet",
+    "model": "claude-3-5-sonnet-latest"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-3-5-haiku",
+    "model": "claude-3-5-haiku-latest"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-3-opus",
+    "model": "claude-3-opus-latest"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-3-7-sonnet",
+    "model": "claude-3-7-sonnet-latest"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-sonnet-4",
+    "model": "claude-sonnet-4-20250514"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-opus-4",
+    "model": "claude-opus-4-20250514"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-opus-4-1",
+    "model": "claude-opus-4-1"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-haiku-4-5",
+    "model": "claude-haiku-4-5"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-sonnet-4-5",
+    "model": "claude-sonnet-4-5"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-sonnet-4-6",
+    "model": "claude-sonnet-4-6"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-opus-4-5",
+    "model": "claude-opus-4-5"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-sonnet-5",
+    "model": "claude-sonnet-5"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "claude-sonnet-latest",
+    "model": "claude-sonnet-5"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-1.5-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-1.5-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-2.0-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-2.0-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-2.0-flash-lite",
+    "model": "gemini-2.5-flash-lite"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-2.5-pro",
+    "model": "gemini-2.5-pro"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-2.5-flash",
+    "model": "gemini-2.5-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-3.0-pro",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-pro-latest",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-flash-latest",
+    "model": "gemini-3.7-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-3.1-flash-lite",
+    "model": "gemini-3.1-flash-lite"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-3.1-pro",
+    "model": "gemini-3.1-pro-preview"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-3.5-flash",
+    "model": "gemini-3.5-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-3.6-flash",
+    "model": "gemini-3.6-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "gemini-3.7-flash",
+    "model": "gemini-3.7-flash"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "sonar-latest",
+    "model": "sonar-pro"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "sonar",
+    "model": "sonar"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "sonar-pro",
+    "model": "sonar-pro"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "sonar-reasoning",
+    "model": "sonar-reasoning"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "sonar-reasoning-pro",
+    "model": "sonar-reasoning-pro"
+  },
+  {
+    "provider": "logiclecloud",
+    "id": "sonar-deep-research",
+    "model": "sonar-deep-research"
+  },
+  {
+    "provider": "mock",
+    "id": "mock-echo",
+    "model": "mock-echo"
+  }
+]

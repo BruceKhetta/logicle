@@ -4,6 +4,10 @@ on:
   push:
   workflow_dispatch:
   workflow_call:
+    outputs:
+      file_analyzer_image:
+        description: 'Analyzer image digest used by the Docker smoke tests'
+        value: ${{ jobs.file-analyzer.outputs.image }}
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && 'push' || github.run_id }}
@@ -143,7 +147,15 @@ jobs:
           name: coverage
           path: coverage/
 
+  file-analyzer:
+    needs: [release-version-tests, providers-mock, check-types, frontend-bundle, unit-tests]
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/file-analyzer.yml
+
   docker:
+    needs: file-analyzer
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -206,7 +218,9 @@ jobs:
           context: .
           load: true
           tags: ${{ env.SMOKE_IMAGE }}
-          build-args: APP_VERSION=${{ steps.buildver.outputs.version }}
+          build-args: |
+            APP_VERSION=${{ steps.buildver.outputs.version }}
+            FILE_ANALYZER_IMAGE=${{ needs.file-analyzer.outputs.image }}
           cache-from: type=gha,scope=docker-build
           # Export only layers in the final image. The builder cache is large enough
           # that mode=max costs more to upload than it saves on the next CI run.

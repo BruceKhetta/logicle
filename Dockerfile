@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.5
 
 # Pin this to a released analyzer version (or digest) when updating it.
-ARG FILE_ANALYZER_IMAGE=ghcr.io/logicleai/mcp-file-analyzer:0.11.0
+ARG FILE_ANALYZER_IMAGE=ghcr.io/brucekhetta/logicle:mcp-file-analyzer-1.0.0
 
 # ---------------------
 # Stage 1: File analyzer
@@ -194,6 +194,8 @@ COPY --from=builder /app/dist-reencrypt ./dist-reencrypt
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/deploy-backend/node_modules ./node_modules
 COPY --from=file-analyzer /mcp-file-analyzer /usr/local/bin/mcp-file-analyzer
+# The analyzer is a Node program; keep its runtime separate from app dependencies.
+COPY --from=file-analyzer /opt/logicle-file-analyzer /opt/logicle-file-analyzer
 
 # Switch to the non-root 'node' for security reasons
 USER node

@@ -508,11 +508,51 @@ export const gpt56LunaModel: LlmModel = {
   maxOutputTokens: 128_000,
 }
 
+// Verified 2026-10-28. Responses API is required for tool calling.
+export const gpt61SolModel: LlmModel = {
+  id: 'gpt-6.1-sol',
+  model: 'gpt-6.1-sol',
+  name: 'GPT-6.1 Sol',
+  description: 'General-purpose reasoning and coding via the Responses API.',
+  provider: 'openai',
+  owned_by: 'openai',
+  context_length: 1_050_000,
+  maxOutputTokens: 128_000,
+  tokenizer: 'o200k_base',
+  capabilities: {
+    vision: true,
+    function_calling: true,
+    supportedMedia: ['application/pdf', 'image/png', 'image/jpeg'],
+    temperature: false,
+  },
+  supportedReasoningEfforts: ['low', 'medium', 'high', 'xhigh'],
+  defaultReasoning: 'medium',
+  tags: ['latest'],
+}
+
+export const gpt61TerraModel: LlmModel = {
+  ...gpt61SolModel,
+  id: 'gpt-6.1-terra',
+  model: 'gpt-6.1-terra',
+  name: 'GPT-6.1 Terra',
+  description: 'Efficient general-purpose and visual reasoning via the Responses API.',
+  supportedReasoningEfforts: ['none', 'low', 'medium', 'high', 'xhigh'],
+}
+
+export const gpt6LunaModel: LlmModel = {
+  ...gpt61TerraModel,
+  id: 'gpt-6-luna',
+  model: 'gpt-6-luna',
+  name: 'GPT-6 Luna',
+  description: 'Cost-efficient model for high-volume workloads via the Responses API.',
+}
+
 export const gptChatLatestModel: LlmModel = {
   ...gpt52ChatModel,
   model: 'chat-latest',
   id: 'chatgpt-5-latest',
-  name: 'Gpt chat latest',
+  name: 'Chat latest (legacy provider alias)',
+  description: 'Legacy chat-latest provider alias; its target is controlled by the provider.',
   tags: ['latest'],
 }
 
@@ -523,7 +563,7 @@ export const gptLatest: LlmModel = {
   tags: ['latest'],
 }
 
-export const openaiModels: LlmModel[] = [
+const legacyOpenaiModels: LlmModel[] = [
   gptLatest,
   gptChatLatestModel,
   gpt35Model,
@@ -554,4 +594,13 @@ export const openaiModels: LlmModel[] = [
   o3DeepResearchModel,
   o4MiniModel,
   o4MiniDeepResearchModel,
+]
+
+// Preserve every persisted ID and its routing; obsolete is a catalog decision,
+// not a claim that the provider has retired every older model.
+export const openaiModels: LlmModel[] = [
+  gpt61SolModel,
+  gpt61TerraModel,
+  gpt6LunaModel,
+  ...legacyOpenaiModels.map((model): LlmModel => ({ ...model, tags: ['obsolete'] })),
 ]

@@ -21,7 +21,7 @@ import {
 import { captureToolRequestContext } from './toolRequestContext'
 import { logger } from '@/lib/logging'
 import { LlmModel, LlmModelCapabilities, modelSupportsReasoning } from '@/lib/chat/models'
-import { claudeThinkingBudgetTokens } from '@/lib/chat/models/anthropic'
+import { claudeThinkingBudgetTokens, usesAdaptiveThinking } from '@/lib/chat/models/anthropic'
 import { llmModels } from '@/lib/models'
 import { z } from 'zod/v4'
 import { ParameterValueAndDescription } from '@/models/user'
@@ -430,6 +430,16 @@ export class ChatAssistant {
   ): Record<string, any> | undefined {
     const assistantParams = this.assistantParams
     const options = this.options
+    if (
+      this.llmModel.tags?.includes('latest') &&
+      assistantParams.reasoning_effort &&
+      this.llmModel.supportedReasoningEfforts?.length &&
+      !this.llmModel.supportedReasoningEfforts.includes(assistantParams.reasoning_effort)
+    ) {
+      throw new UserVisibleError(
+        `${this.llmModel.name} does not support reasoning effort ${assistantParams.reasoning_effort}. Select a supported reasoning effort in the assistant settings.`
+      )
+    }
     const vercelProviderType = this.languageModel.provider
     const providerOptions = Object.fromEntries(
       tools.flatMap((tool) =>
@@ -460,6 +470,7 @@ export class ChatAssistant {
       return {
         openai: {
           store: false,
+          ...(this.llmModel.model.startsWith('gpt-6') ? { forceReasoning: true } : {}),
           user: options.user,
           ...(env.chat.disableParallelToolCalls ? { parallelToolCalls: false } : {}),
           ...(modelSupportsReasoning(this.llmModel)
@@ -494,8 +505,16 @@ export class ChatAssistant {
         anthropic: {
           ...(env.chat.disableParallelToolCalls ? { disableParallelToolUse: true } : {}),
           ...providerOptions,
-          ...((claudeThinkingBudgetTokens(assistantParams.reasoning_effort ?? undefined) ?? 0) >
-            0 && modelSupportsReasoning(this.llmModel)
+          ...(usesAdaptiveThinking(this.llmModel)
+            ? {
+                thinking: { type: 'adaptive' as const, display: 'summarized' as const },
+                effort: (assistantParams.reasoning_effort ?? this.llmModel.defaultReasoning) as
+                  | 'low'
+                  | 'medium'
+                  | 'high',
+              }
+            : (claudeThinkingBudgetTokens(assistantParams.reasoning_effort ?? undefined) ?? 0) >
+                0 && modelSupportsReasoning(this.llmModel)
             ? {
                 thinking: {
                   type: 'enabled',
@@ -647,6 +666,16 @@ export class ChatAssistant {
     const forcedToolChoice =
       this.assistantParams.toolChoiceSequence?.[this.forcedToolChoiceIndex] ??
       (this.forcedToolChoiceIndex === 0 ? this.assistantParams.toolChoice : undefined)
+    if (
+      usesAdaptiveThinking(this.llmModel) &&
+      forcedToolChoice &&
+      forcedToolChoice !== 'auto' &&
+      forcedToolChoice !== 'none'
+    ) {
+      throw new UserVisibleError(
+        `${this.llmModel.name} does not support forced tool choice. Use automatic tool selection.`
+      )
+    }
     let { tools: promptTools, functions: promptFunctions } = selectCompressionPromptCapabilities({
       tools: this.tools,
       functions: this.functions,

@@ -13,6 +13,8 @@ import { loggingFetch } from '@/lib/logging'
 import { LlmModel } from '@/lib/chat/models'
 import { ProviderConfig } from '@/types/provider'
 import { EchoLanguageModel } from './echo-language-model'
+import { modelRetirementMessage } from '@/lib/chat/models/lifecycle'
+import { UserVisibleError } from './exceptions'
 
 type CreateLanguageModelOptions = {
   user?: string
@@ -26,7 +28,7 @@ export const geminiThinkingConfigFromReasoningEffort = (
 ):
   | { thinkingLevel: AssistantReasoningEffort; includeThoughts: true }
   | { thinkingBudget: number; includeThoughts: true } => {
-  if (modelId.includes('gemini-3')) {
+  if (/gemini-[34]/.test(modelId)) {
     return { thinkingLevel: reasoningEffort, includeThoughts: true }
   }
   // Gemini 2.5 models use a budget; 0 disables thinking.
@@ -48,6 +50,8 @@ export function createLanguageModelBasic(
   model: LlmModel,
   options: CreateLanguageModelOptions = {}
 ): LanguageModelV3 {
+  const retirementMessage = modelRetirementMessage(model)
+  if (retirementMessage) throw new UserVisibleError(retirementMessage)
   const fetch = env.dumpLlmConversation ? loggingFetch : undefined
   switch (params.providerType) {
     case 'openai':

@@ -87,7 +87,7 @@ export const sonarLatest: LlmModel = {
   tags: ['latest'],
 }
 
-export const perplexityModels: LlmModel[] = [
+const legacyPerplexityModels: LlmModel[] = [
   sonarLatest,
   sonarModel,
   sonarProModel,
@@ -95,3 +95,13 @@ export const perplexityModels: LlmModel[] = [
   sonarReasoningProModel,
   sonarDeepResearchModel,
 ]
+
+// Agent API presets need a separate Responses adapter. Keep explicit Sonar
+// choices available in the meantime without silently retargeting saved IDs.
+export const perplexityModels: LlmModel[] = legacyPerplexityModels.map(
+  (model): LlmModel => ({
+    ...model,
+    tags:
+      model.id === 'sonar-pro' || model.id === 'sonar-deep-research' ? ['latest'] : ['obsolete'],
+  })
+)

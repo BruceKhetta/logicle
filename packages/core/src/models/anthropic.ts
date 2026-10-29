@@ -288,14 +288,54 @@ export const claude5SonnetModel: LlmModel = {
   maxOutputTokens: 64000,
 }
 
+export const claude55OpusModel: LlmModel = {
+  id: 'claude-opus-5-5',
+  model: 'claude-opus-5-5',
+  name: 'Claude Opus 5.5',
+  description: 'Advanced coding and agent workflows with adaptive thinking.',
+  provider: 'anthropic',
+  owned_by: 'anthropic',
+  context_length: 1_000_000,
+  maxOutputTokens: 128_000,
+  tokenizer: 'anthropic_heuristic',
+  capabilities: {
+    vision: true,
+    function_calling: true,
+    supportedMedia: ['application/pdf', 'image/png', 'image/jpeg'],
+    nativePdfPageLimit: 100,
+    promptCaching: true,
+    temperature: false,
+  },
+  supportedReasoningEfforts: ['low', 'medium', 'high'],
+  defaultReasoning: 'medium',
+  tags: ['latest'],
+}
+
+export const claude55SonnetModel: LlmModel = {
+  ...claude55OpusModel,
+  id: 'claude-sonnet-5-5',
+  model: 'claude-sonnet-5-5',
+  name: 'Claude Sonnet 5.5',
+  description: 'Balanced general-purpose model with adaptive thinking.',
+  defaultReasoning: 'high',
+}
+
+export const claude55HaikuModel: LlmModel = {
+  ...claude55OpusModel,
+  id: 'claude-haiku-5-5',
+  model: 'claude-haiku-5-5',
+  name: 'Claude Haiku 5.5',
+  description: 'Fast model for classification, extraction, and high-volume tasks.',
+}
+
 export const claudeSonnetLatest: LlmModel = {
   ...claude5SonnetModel,
-  name: 'Claude Sonnet latest (5)',
+  name: 'Claude Sonnet 5 (legacy latest alias)',
   id: 'claude-sonnet-latest',
   tags: ['latest'],
 }
 
-export const anthropicModels: LlmModel[] = [
+const legacyAnthropicModels: LlmModel[] = [
   claudeSonnetLatest,
   claude3OpusModel,
   claude3SonnetModel,
@@ -312,3 +352,13 @@ export const anthropicModels: LlmModel[] = [
   claude46SonnetModel,
   claude5SonnetModel,
 ]
+
+export const anthropicModels: LlmModel[] = [
+  claude55OpusModel,
+  claude55SonnetModel,
+  claude55HaikuModel,
+  ...legacyAnthropicModels.map((model): LlmModel => ({ ...model, tags: ['obsolete'] })),
+]
+
+export const usesAdaptiveThinking = (model: LlmModel): boolean =>
+  model.owned_by === 'anthropic' && /^claude-(opus|sonnet|haiku)-5-5$/.test(model.model)

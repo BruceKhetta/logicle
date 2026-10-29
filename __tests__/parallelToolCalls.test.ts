@@ -1,3 +1,10 @@
+import { gpt61SolModel } from '@/lib/chat/models/openai'
+import {
+  claude55OpusModel,
+  claude55SonnetModel,
+  claude55HaikuModel,
+} from '@/lib/chat/models/anthropic'
+import { gemini4ArgonModel } from '@/lib/chat/models/gemini'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ChatAssistant, type AssistantParams } from '@/backend/lib/chat/index'
 import { ChatState } from '@/backend/lib/chat/ChatState'
@@ -22,6 +29,7 @@ vi.mock('@/lib/env', () => ({
       maxOutputTokens: undefined,
       autoSummary: { enable: false },
     },
+    promptCaching: { openai: 'none', anthropic: { automatic: 'none', preamble: 'none' } },
     dumpLlmConversation: false,
     fileStorage: { encryptFiles: false },
   },
@@ -88,8 +96,20 @@ function makeStream(chunks: any[]) {
 /** Two tool-call chunks followed by a finish. */
 function twoToolCallChunks() {
   return [
-    { type: 'tool-call', toolCallId: 'tc1', toolName: 'tool1', input: { q: 'hello' }, providerExecuted: false },
-    { type: 'tool-call', toolCallId: 'tc2', toolName: 'tool2', input: { q: 'world' }, providerExecuted: false },
+    {
+      type: 'tool-call',
+      toolCallId: 'tc1',
+      toolName: 'tool1',
+      input: { q: 'hello' },
+      providerExecuted: false,
+    },
+    {
+      type: 'tool-call',
+      toolCallId: 'tc2',
+      toolName: 'tool2',
+      input: { q: 'world' },
+      providerExecuted: false,
+    },
     { type: 'finish', totalUsage: { totalTokens: 10, inputTokens: 5 } },
   ]
 }
@@ -128,10 +148,14 @@ function makeTool(invoke: ToolFunction['invoke'], extra: Partial<ToolFunction> =
   return { description: 'test tool', invoke, ...extra }
 }
 
-function makeAssistant(tools: Record<string, ToolFunction>) {
-  vi
-    .spyOn(ChatAssistant, 'createLanguageModel')
-    .mockReturnValue({ provider: 'openai.chat' } as unknown as LanguageModelV3)
+function makeAssistant(
+  tools: Record<string, ToolFunction>,
+  modelOverride?: LlmModel,
+  paramsOverride?: Partial<AssistantParams>
+) {
+  vi.spyOn(ChatAssistant, 'createLanguageModel').mockReturnValue({
+    provider: 'openai.chat',
+  } as unknown as LanguageModelV3)
 
   const assistantParams: AssistantParams = {
     model: 'gpt-4',
@@ -161,8 +185,8 @@ function makeAssistant(tools: Record<string, ToolFunction>) {
 
   return new ChatAssistant(
     { providerType: 'openai.chat' } as unknown as ProviderConfig,
-    assistantParams,
-    llmModel,
+    { ...assistantParams, ...paramsOverride },
+    modelOverride ?? llmModel,
     [],
     { user: 'user-1' },
     {},
@@ -193,8 +217,12 @@ describe('parallel tool execution', () => {
   })
 
   test('invokes both tools when LLM returns two tool calls', async () => {
-    const invoke1 = vi.fn().mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
-    const invoke2 = vi.fn().mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
+    const invoke1 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
+    const invoke2 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
     const assistant = makeAssistant({ tool1: makeTool(invoke1), tool2: makeTool(invoke2) })
     const testableAssistant = asTestableAssistant(assistant)
     const invokeLlmSpy = vi.spyOn(testableAssistant, 'invokeLlm')
@@ -208,8 +236,12 @@ describe('parallel tool execution', () => {
   })
 
   test('both tool-result parts appear in SSE events', async () => {
-    const invoke1 = vi.fn().mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
-    const invoke2 = vi.fn().mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
+    const invoke1 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
+    const invoke2 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
     const assistant = makeAssistant({ tool1: makeTool(invoke1), tool2: makeTool(invoke2) })
     const testableAssistant = asTestableAssistant(assistant)
     const invokeLlmSpy = vi.spyOn(testableAssistant, 'invokeLlm')
@@ -230,8 +262,12 @@ describe('parallel tool execution', () => {
   })
 
   test('both results are stored in a single tool message', async () => {
-    const invoke1 = vi.fn().mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
-    const invoke2 = vi.fn().mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
+    const invoke1 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
+    const invoke2 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
     const assistant = makeAssistant({ tool1: makeTool(invoke1), tool2: makeTool(invoke2) })
     const testableAssistant = asTestableAssistant(assistant)
     const invokeLlmSpy = vi.spyOn(testableAssistant, 'invokeLlm')
@@ -371,8 +407,12 @@ describe('auth and requireConfirm interrupts', () => {
   })
 
   test('auth returning null does not interrupt execution', async () => {
-    const invoke1 = vi.fn().mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
-    const invoke2 = vi.fn().mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
+    const invoke1 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r1' } as dto.ToolCallResultOutput)
+    const invoke2 = vi
+      .fn()
+      .mockResolvedValue({ type: 'text', value: 'r2' } as dto.ToolCallResultOutput)
     const assistant = makeAssistant({
       tool1: makeTool(invoke1, { auth: async () => null }),
       tool2: makeTool(invoke2, { auth: async () => null }),
@@ -523,5 +563,68 @@ describe('providerOptions: Gemini thinking config is forwarded', () => {
 
     const opts = testableAssistant.providerOptions([]) as ProviderOptionsShape
     expect(opts?.vertex?.thinkingConfig?.thinkingBudget).toBe(4096)
+  })
+})
+
+describe('current catalog provider options', () => {
+  test('forces GPT-6 reasoning with stateless Responses API requests', () => {
+    const assistant = makeAssistant({}, gpt61SolModel)
+    const target = asTestableAssistant(assistant)
+    target.languageModel = { provider: 'openai.responses' }
+    expect(target.providerOptions([])).toMatchObject({
+      openai: {
+        forceReasoning: true,
+        store: false,
+        reasoningEffort: 'medium',
+        reasoningSummary: 'auto',
+      },
+    })
+  })
+
+  test.each([claude55OpusModel, claude55SonnetModel, claude55HaikuModel])(
+    '$id uses adaptive thinking and its documented default effort',
+    (model) => {
+      const assistant = makeAssistant({}, model)
+      const target = asTestableAssistant(assistant)
+      target.languageModel = { provider: 'anthropic.messages' }
+      expect(target.providerOptions([])).toMatchObject({
+        anthropic: {
+          thinking: { type: 'adaptive', display: 'summarized' },
+          effort: model.defaultReasoning,
+        },
+      })
+    }
+  )
+
+  test('Gemini 4 uses thinking levels rather than a token budget', () => {
+    const assistant = makeAssistant({}, gemini4ArgonModel)
+    const target = asTestableAssistant(assistant)
+    target.languageModel = { provider: 'google.generative-ai' }
+    expect(target.providerOptions([])).toEqual({
+      google: {
+        thinkingConfig: { thinkingLevel: 'medium', includeThoughts: true },
+      },
+    })
+  })
+})
+
+describe('unsupported current-model settings', () => {
+  test('rejects reasoning none on Sol with an actionable error', () => {
+    const assistant = makeAssistant({}, gpt61SolModel, { reasoning_effort: 'none' })
+    const target = asTestableAssistant(assistant)
+    target.languageModel = { provider: 'openai.responses' }
+    expect(() => target.providerOptions([])).toThrow('does not support reasoning effort none')
+  })
+
+  test('rejects fixed-budget reasoning choices on adaptive Claude', () => {
+    const assistant = makeAssistant({}, claude55OpusModel, { reasoning_effort: 'minimal' })
+    const target = asTestableAssistant(assistant)
+    target.languageModel = { provider: 'anthropic.messages' }
+    expect(() => target.providerOptions([])).toThrow('Select a supported reasoning effort')
+  })
+
+  test('rejects forced Claude tool choice before prompt construction', async () => {
+    const assistant = makeAssistant({}, claude55OpusModel, { toolChoice: 'required' })
+    await expect(assistant.invokeLlm([])).rejects.toThrow('Use automatic tool selection')
   })
 })

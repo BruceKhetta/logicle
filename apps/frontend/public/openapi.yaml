@@ -4758,6 +4758,10 @@ components:
           type: boolean
         promptCaching:
           type: boolean
+        nativePdfPageLimit:
+          type: number
+        temperature:
+          type: boolean
       required:
         - vision
         - function_calling

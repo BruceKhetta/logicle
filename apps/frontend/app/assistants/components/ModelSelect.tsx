@@ -126,9 +126,12 @@ export default function ModelSelect({
 
   const groups = React.useMemo(() => {
     const latest = models
-      .filter((m) => m.llmModel.tags?.includes('latest'))
+      .filter((m) => m.llmModel.tags?.includes('latest') && !m.llmModel.tags?.includes('obsolete'))
       .sort((a, b) => providerPriority(a.llmModel.owned_by) - providerPriority(b.llmModel.owned_by))
-    const nonLatest = models.filter((m) => !m.llmModel.tags?.includes('latest'))
+    const nonLatest = models.filter(
+      (m) => !m.llmModel.tags?.includes('latest') && !m.llmModel.tags?.includes('obsolete')
+    )
+    const obsolete = models.filter((m) => m.llmModel.tags?.includes('obsolete'))
 
     const grouped = nonLatest.reduce((acc, m) => {
       const key = m.llmModel.owned_by as EngineOwner
@@ -148,9 +151,10 @@ export default function ModelSelect({
     for (const [key, value] of sortedEntries) {
       result.push({ tag: key, list: value })
     }
+    if (obsolete.length > 0) result.push({ tag: t('obsolete'), list: obsolete })
 
     return result
-  }, [models])
+  }, [models, t])
 
   const showBackend = new Set(models.map((m) => m.backendId)).size > 1
   return (

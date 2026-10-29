@@ -50,7 +50,7 @@ jobs:
     needs: version
     permissions:
       contents: read
-      packages: read
+      packages: write
     uses: ./.github/workflows/ci.yml
 
   publish:
@@ -88,7 +88,9 @@ jobs:
             org.opencontainers.image.version=${{ needs.version.outputs.version }}
           cache-from: type=gha,scope=docker-build
           cache-to: type=gha,mode=min,scope=docker-build
-          build-args: APP_VERSION=${{ needs.version.outputs.version }}
+          build-args: |
+            APP_VERSION=${{ needs.version.outputs.version }}
+            FILE_ANALYZER_IMAGE=${{ needs.tests.outputs.file_analyzer_image }}
 
       - name: Create fork tag and GitHub Release
         env:

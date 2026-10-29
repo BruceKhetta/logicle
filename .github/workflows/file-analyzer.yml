@@ -1,0 +1,100 @@
+name: Build and publish MCP file analyzer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Analyzer version tag (e.g. 1.0.0); use a new version for changed contents'
+        required: true
+        default: '1.0.0'
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        description: 'Optional explicit version tag; ordinary CI publishes only the commit tag'
+        required: false
+        default: ''
+        type: string
+    outputs:
+      image:
+        description: 'Published analyzer image pinned to its multi-platform digest'
+        value: ${{ jobs.publish.outputs.image }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: file-analyzer-${{ github.repository }}-${{ inputs.version || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'BruceKhetta/logicle'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.resolve.outputs.image }}@${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout selected commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.22.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Validate tags in the Logicle GHCR package
+        id: resolve
+        env:
+          ANALYZER_VERSION: ${{ inputs.version }}
+        run: node .github/scripts/file-analyzer-image.mjs
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Verify analyzer source and runtime packaging
+        run: |
+          node --test .github/scripts/file-analyzer-image.test.mjs packages/file-analyzer/scripts/stage-runtime.test.mjs
+          pnpm run check-types
+          pnpm test -- packages/file-analyzer/__tests__
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build, verify, and push analyzer (amd64 and arm64)
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: packages/file-analyzer/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.resolve.outputs.sha_tag }}
+            ${{ steps.resolve.outputs.version_tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=Logicle MCP file analyzer
+          cache-from: type=gha,scope=file-analyzer
+          cache-to: type=gha,mode=min,scope=file-analyzer
