@@ -8,34 +8,21 @@ on:
         required: true
         default: '1.0.0'
         type: string
-  workflow_call:
-    inputs:
-      version:
-        description: 'Optional explicit version tag; ordinary CI publishes only the commit tag'
-        required: false
-        default: ''
-        type: string
-    outputs:
-      image:
-        description: 'Published analyzer image pinned to its multi-platform digest'
-        value: ${{ jobs.publish.outputs.image }}
 
 permissions:
   contents: read
 
 concurrency:
-  group: file-analyzer-${{ github.repository }}-${{ inputs.version || github.sha }}
+  group: file-analyzer-${{ github.repository }}-${{ inputs.version }}
   cancel-in-progress: false
 
 jobs:
   publish:
-    if: github.repository == 'BruceKhetta/logicle'
+    if: github.repository == 'BruceKhetta/logicle' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    outputs:
-      image: ${{ steps.resolve.outputs.image }}@${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout selected commit
         uses: actions/checkout@v6
@@ -91,9 +78,7 @@ jobs:
           file: packages/file-analyzer/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ steps.resolve.outputs.sha_tag }}
-            ${{ steps.resolve.outputs.version_tag }}
+          tags: ${{ steps.resolve.outputs.version_tag }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}

@@ -7,7 +7,11 @@ on:
     outputs:
       file_analyzer_image:
         description: 'Analyzer image digest used by the Docker smoke tests'
-        value: ${{ jobs.file-analyzer.outputs.image }}
+        value: ${{ jobs.docker.outputs.file_analyzer_image }}
+
+permissions:
+  contents: read
+  packages: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && 'push' || github.run_id }}
@@ -28,8 +32,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Test release input validation
-        run: node --test .github/scripts/release-version.test.mjs
+      - name: Test CI inputs and analyzer references
+        run: node --test .github/scripts/*.test.mjs
 
   providers-mock:
     runs-on: ubuntu-latest
@@ -147,16 +151,10 @@ jobs:
           name: coverage
           path: coverage/
 
-  file-analyzer:
-    needs: [release-version-tests, providers-mock, check-types, frontend-bundle, unit-tests]
-    permissions:
-      contents: read
-      packages: write
-    uses: ./.github/workflows/file-analyzer.yml
-
   docker:
-    needs: file-analyzer
     runs-on: ubuntu-latest
+    outputs:
+      file_analyzer_image: ${{ steps.analyzer.outputs.image }}
     permissions:
       contents: read
       packages: read
@@ -212,6 +210,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Resolve the released analyzer pinned in Dockerfile
+        id: analyzer
+        run: node .github/scripts/resolve-file-analyzer-reference.mjs
+
       - name: Build production image (local)
         uses: docker/build-push-action@v5
         with:
@@ -220,7 +222,7 @@ jobs:
           tags: ${{ env.SMOKE_IMAGE }}
           build-args: |
             APP_VERSION=${{ steps.buildver.outputs.version }}
-            FILE_ANALYZER_IMAGE=${{ needs.file-analyzer.outputs.image }}
+            FILE_ANALYZER_IMAGE=${{ steps.analyzer.outputs.image }}
           cache-from: type=gha,scope=docker-build
           # Export only layers in the final image. The builder cache is large enough
           # that mode=max costs more to upload than it saves on the next CI run.

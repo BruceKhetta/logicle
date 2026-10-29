@@ -73,27 +73,30 @@ l'help, un'operazione PNG con Sharp e la presenza delle utility native per ogni
 architettura target. Il launcher usa un percorso assoluto e funziona anche
 quando Logicle cambia la directory di lavoro nel sandbox di conversazione.
 
-Il workflow **Build and publish MCP file analyzer** pubblica nello stesso package
-GHCR dell'app, `ghcr.io/brucekhetta/logicle`, per `linux/amd64` e `linux/arm64`:
-
-- la CI ordinaria usa `mcp-file-analyzer-sha-<commit completo>`;
-- l'avvio manuale aggiunge il tag `mcp-file-analyzer-<version>`, ad esempio
-  `mcp-file-analyzer-1.0.0`;
-- i tag applicativi e `latest` non vengono assegnati dal workflow dell'analyzer.
+Il workflow **Build and publish MCP file analyzer** si avvia solo manualmente.
+Pubblica nello stesso package dell'app, `ghcr.io/brucekhetta/logicle`, per
+`linux/amd64` e `linux/arm64`, assegnando soltanto il tag
+`mcp-file-analyzer-<version>`, ad esempio `mcp-file-analyzer-1.0.0`.
+Non viene richiamato a ogni push né dalla release dell'app; non genera tag per
+commit e non assegna i tag applicativi o `latest`.
 
 Il Dockerfile principale mantiene lo stage `FROM ... AS file-analyzer` e copia
 launcher e runtime dall'immagine pubblicata. Il default è
-`ghcr.io/brucekhetta/logicle:mcp-file-analyzer-1.0.0`. **Prima di usarlo localmente,
-pubblica questa versione tramite il workflow manuale**: la modifica dei file non
-crea automaticamente il tag sul registry. Serve rendere il package leggibile
-all'utente che esegue il pull, oppure abilitarne la visibilità pubblica su GHCR.
+`ghcr.io/brucekhetta/logicle:mcp-file-analyzer-1.0.0`. **Prima di usarlo, pubblica
+questa versione tramite il workflow manuale**: la modifica dei file non crea il
+tag sul registry. Servono accesso in lettura al package o visibilità pubblica.
 
-La CI e la release applicativa passano `FILE_ANALYZER_IMAGE` con il digest
-prodotto dalla stessa esecuzione, così smoke test e pubblicazione dell'app usano
-la medesima immagine dell'analyzer. Non dipendono dal tag manuale di default.
-Per nuovi contenuti usa una nuova versione; rieseguire manualmente una versione
-esistente può riassegnarne il tag. I digest restano i riferimenti esatti delle
-build già verificate.
+La CI ordinaria esegue i test del sorgente nella suite normale, legge il pin dal
+Dockerfile e risolve il digest dell'immagine già pubblicata. Smoke test e release
+usano quello stesso digest; la CI non costruisce o pubblica una nuova immagine
+dell'analyzer se il pin non è disponibile. I permessi sul registry sono in sola
+lettura, salvo i job manuali di pubblicazione.
+
+Per adottare modifiche dell'analyzer occorre pubblicare manualmente una nuova
+versione e aggiornare esplicitamente il pin nel Dockerfile. La sola modifica dei
+sorgenti non aggiorna il runtime MCP importato nell'app. Per nuovi contenuti usa
+una nuova versione; un rilascio manuale con una versione già esistente può
+riassegnare quel tag. I digest identificano le build esatte verificate dalla CI.
 
 Per sviluppo locale, senza immagine, il comando stdio resta:
 

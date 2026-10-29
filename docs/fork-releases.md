@@ -56,59 +56,66 @@ the image push succeeds but release creation fails, the image can already
 exist; inspect the failed step before retrying. Choose a new suffix for a
 new release instead of overwriting an existing release tag.
 
-## MCP file analyzer in the same GHCR package
+## MCP file analyzer: manual, versioned releases
 
-**Build and publish MCP file analyzer** is a reusable workflow in this repository,
-also available through `workflow_dispatch`. It builds the local sources with
-`packages/file-analyzer/Dockerfile` for `linux/amd64` and `linux/arm64`, validates
-the analyzer/runtime, and publishes to **the same** `ghcr.io/brucekhetta/logicle`
-package as the application. No separate GitHub repository or GHCR package is
-created. Its tags are isolated from the application's tags:
+**Build and publish MCP file analyzer** runs only through `workflow_dispatch`.
+It builds the local sources with `packages/file-analyzer/Dockerfile` for
+`linux/amd64` and `linux/arm64` and publishes to the same
+`ghcr.io/brucekhetta/logicle` package as the application. No separate repository
+or package is created.
 
-- Every CI run publishes `mcp-file-analyzer-sha-<full commit SHA>`.
-- A manual run additionally publishes `mcp-file-analyzer-<version>`.
-- The analyzer workflow does not assign application release tags or `latest`.
+A manual release publishes only `mcp-file-analyzer-<version>`, for example
+`mcp-file-analyzer-1.0.0`. It does not publish commit tags, application tags, or
+`latest`. Neither ordinary pushes nor application releases invoke this workflow.
+There is no automatic fallback build when the required image is unavailable.
+Existing registry images are not deleted by this change.
 
-The Basic CI publication job waits for release-input validation, provider mocks,
-type checking, frontend checks, and unit tests. The analyzer workflow also runs
-its own focused source/packaging tests so a standalone manual invocation remains
-validated. Native image checks run during each platform's Docker build, before
-the multi-platform manifest is pushed. The app's Docker smoke job then receives
-that image's digest as `FILE_ANALYZER_IMAGE`.
+### Ordinary CI and application releases
 
-The reusable CI exposes `file_analyzer_image`; the application release workflow
-passes this same digest into its final build. Permissions for that caller include
-`packages: write` because CI now publishes the component before the app build.
-Only `BruceKhetta/logicle` may publish; authentication uses the existing
-`GITHUB_TOKEN`, with no additional credentials.
+Push CI still checks analyzer source as part of the normal unit tests. It does
+not repeat the analyzer's dedicated multi-platform build and packaging tests or
+push analyzer images. Its registry permissions are read-only.
 
-### First publication and local builds
+Before building the application, the Docker job reads `FILE_ANALYZER_IMAGE` from
+the checked-out app Dockerfile, resolves that released version to its registry
+manifest digest, and passes the digest into the app build and smoke tests. The
+reusable CI exports this reference as `file_analyzer_image`; the application
+release uses that same digest. The release validation caller needs only
+`packages: read`; the final application publication job retains its own write
+permission for publishing the application.
 
-Once the workflow is available on the default branch, open **Actions → Build and
-publish MCP file analyzer → Run workflow**, select the desired source branch,
-and set `version: 1.0.0`. This creates the default image expected by the app:
+If the configured version is missing or unreadable, CI fails with instructions
+to publish it manually and check GHCR access. It never publishes on behalf of
+a normal CI run. Workflow policy tests guard against reintroducing an automatic
+call to the analyzer publisher.
 
-`ghcr.io/brucekhetta/logicle:mcp-file-analyzer-1.0.0`
+### Publishing or upgrading the analyzer
 
-Until that run succeeds, the default tag does not exist. CI and release builds
-bootstrap independently by first publishing the commit image, then consuming its
-digest. For local builds before a version tag exists, override
-`FILE_ANALYZER_IMAGE` with a published commit tag/digest, or build the component
-locally using its Dockerfile and use that local image as the build argument.
-GHCR read access or public package visibility is required for pulls from other
-machines. Package visibility/access remains an account/repository setting.
+1. Make the manual workflow available on the default branch.
+2. Open **Actions → Build and publish MCP file analyzer → Run workflow**.
+3. Select the source branch and set the component version, initially `1.0.0`.
+4. After publication succeeds, set the app Dockerfile's `FILE_ANALYZER_IMAGE`
+   default to the released version (or its digest). The initial default already
+   selects `ghcr.io/brucekhetta/logicle:mcp-file-analyzer-1.0.0`.
+5. Run ordinary app CI/release using that published dependency.
 
-Choose a new component version for changed contents. A manual rerun with the
-same version may reassign that version tag; the CI/app release pipeline always
-uses digests to identify the exact artifact tested in that run. A failed later
-app smoke test can leave a commit-tagged analyzer image published, but blocks the
-application release. Component publication alone creates no Git tag or GitHub
-Release and does not deploy anything.
+For changes to the analyzer, choose a new component version, publish it manually,
+and explicitly update the Dockerfile pin when the app should adopt it. A source
+change alone does not upgrade the MCP runtime imported into the application.
+A manual rerun of an existing version may reassign its tag; use a new version
+for changed contents. CI and app release builds preserve the exact digest they
+resolved and tested in that execution.
 
-The main Dockerfile retains its original analyzer stage/import structure. The
-only additions are the fork image reference and the separate Node runtime
-folder imported alongside the launcher. The backend build no longer compiles
-the MCP executable; the internal file-analysis worker is unchanged.
+The manual workflow validates tags, runtime packaging, TypeScript and focused
+analyzer tests before building. Native image checks run for each target platform
+before publication. Only `BruceKhetta/logicle` may publish; authentication uses
+the existing `GITHUB_TOKEN`. Component publication creates no Git tag or GitHub
+Release and does not deploy anything. GHCR read access or public package
+visibility is needed for pulls from other machines.
+
+The main Dockerfile retains its original analyzer stage/import structure and
+imports the launcher plus its separate Node runtime folder. The backend's
+internal file-analysis worker is unchanged.
 
 See [file analyzer source and tool contract](../packages/file-analyzer/README.md)
 for supported formats and the [dedicated Dockerfile](../packages/file-analyzer/Dockerfile).

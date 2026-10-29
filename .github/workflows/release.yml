@@ -50,7 +50,7 @@ jobs:
     needs: version
     permissions:
       contents: read
-      packages: write
+      packages: read
     uses: ./.github/workflows/ci.yml
 
   publish:
