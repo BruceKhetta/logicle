@@ -112,7 +112,7 @@ aggiungilo ai tool di un assistente con un modello che supporta le funzioni.
 Il backend Mock Echo consente di provare l'app ma non sceglie autonomamente i tool.
 
 ```sh
-pnpm test -- packages/file-analyzer/__tests__ \
+pnpm exec vitest run packages/file-analyzer/__tests__ \
   apps/backend/lib/tools/mcp/__tests__/file-bridge.test.ts \
   __tests__/toolOutputNormalization.test.ts
 pnpm run check-types
