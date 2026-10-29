@@ -1,0 +1,2 @@
+#!/bin/sh
+exec node /opt/logicle-file-analyzer/mcp-file-analyzer.mjs "$@"

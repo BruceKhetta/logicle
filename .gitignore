@@ -204,3 +204,7 @@ yarn-error.log*
 
 .codex
 .playwright-mcp
+
+# Standalone MCP analyzer build output
+/dist-file-analyzer/
+tools/testing/*
