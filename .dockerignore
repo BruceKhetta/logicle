@@ -1,6 +1,13 @@
 node_modules
 .next
 
+# Keep local configuration and Git history out of application/test images.
+.git
+**/.env
+**/.env.*
+**/.aws
+**/.codex
+
 # repo-level files that don't belong in the image
 Dockerfile
 .dockerignore
@@ -13,3 +20,7 @@ CODE_OF_CONDUCT.md
 TESTING.md
 .github/
 tmp/
+
+# Local analyzer bundles and verification artifacts are rebuilt inside Docker.
+dist-file-analyzer
+.cache
