@@ -357,17 +357,19 @@ describe('ChatAssistant.withBuiltinTools', () => {
 })
 
 describe('ChatAssistant.build', () => {
+  // Synthetic models keep these orchestration tests independent of provider retirement dates.
   test('throws when authenticated user is missing in options', async () => {
+    const model = makeFakeLlmModel()
     const { llmModels } = await import('@/lib/models')
     ;(llmModels as unknown as LlmModel[]).splice(0, (llmModels as unknown as LlmModel[]).length)
-    ;(llmModels as unknown as LlmModel[]).push(makeFakeLlmModel({ id: 'gpt-4', model: 'gpt-4' }))
+    ;(llmModels as unknown as LlmModel[]).push(model)
 
     await expect(
       ChatAssistant.build(
         { providerType: 'openai', apiKey: 'k', provisioned: false } as unknown as ProviderConfig,
         {
           assistantId: 'a1',
-          model: 'gpt-4',
+          model: model.id,
           systemPrompt: '',
           temperature: 0,
           tokenLimit: 1000,
@@ -383,16 +385,17 @@ describe('ChatAssistant.build', () => {
   })
 
   test('adds context-retrieve when context compression is enabled', async () => {
+    const model = makeFakeLlmModel()
     const { llmModels } = await import('@/lib/models')
     ;(llmModels as unknown as LlmModel[]).splice(0, (llmModels as unknown as LlmModel[]).length)
-    ;(llmModels as unknown as LlmModel[]).push(makeFakeLlmModel({ id: 'gpt-4', model: 'gpt-4' }))
+    ;(llmModels as unknown as LlmModel[]).push(model)
     mockCreateOpenAI.mockReturnValue({ responses: () => ({ provider: 'openai.responses' }) })
 
     const assistant = await ChatAssistant.build(
       { providerType: 'openai', apiKey: 'k', provisioned: false } as unknown as ProviderConfig,
       {
         assistantId: 'a1',
-        model: 'gpt-4',
+        model: model.id,
         systemPrompt: '',
         temperature: 0,
         tokenLimit: 1000,
