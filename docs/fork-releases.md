@@ -32,7 +32,9 @@ This example produces:
 - Container image: `ghcr.io/brucekhetta/logicle:0.36.0-nh-1`.
 - Git tag and GitHub Release: `v0.36.0-nh-1`.
 
-The workflow validates inputs, verifies that the upstream tag is an ancestor
+The workflow validates inputs and fetches the exact base tag from
+`logicleai/logicle` into `refs/release-validation/upstream-base`, without
+overwriting or requiring a matching tag in the fork. It verifies that the upstream tag is an ancestor
 of the selected commit, and refuses an existing fork release tag. It runs
 the complete CI before building and publishing the image. The GitHub Release
 then records the selected commit, upstream base and published image digest.
