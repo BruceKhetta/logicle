@@ -42,6 +42,7 @@ jobs:
       - name: Resolve and validate release version
         id: resolve
         env:
+          UPSTREAM_REPOSITORY: logicleai/logicle
           UPSTREAM_TAG: ${{ inputs.upstream_tag }}
           NH_TAG: ${{ inputs.nh_tag }}
         run: node .github/scripts/release-version.mjs

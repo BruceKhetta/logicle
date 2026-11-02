@@ -35,19 +35,41 @@ export function resolveReleaseVersion(upstreamTag, nhTag, repository) {
   }
 }
 
+export function resolveUpstreamBase(upstreamRepository, upstreamTag, sha, runGit = execFileSync) {
+  if (typeof upstreamRepository !== 'string' || !/^[A-Za-z0-9-]+\/[A-Za-z0-9_.-]+$/.test(upstreamRepository)) {
+    throw new Error('UPSTREAM_REPOSITORY must be a GitHub owner/repository name.')
+  }
+  // Validate before placing the supplied tag in a fetch refspec.
+  resolveReleaseVersion(upstreamTag, '1', upstreamRepository)
+  const upstreamRef = 'refs/release-validation/upstream-base'
+  const upstreamUrl = `https://github.com/${upstreamRepository}.git`
+  try {
+    runGit('git', ['fetch', '--no-tags', upstreamUrl, `+refs/tags/${upstreamTag}:${upstreamRef}`], {
+      stdio: 'inherit',
+    })
+  } catch (cause) {
+    throw new Error(`Could not fetch upstream tag ${upstreamTag} from ${upstreamRepository}.`, { cause })
+  }
+  const baseCommit = runGit('git', ['rev-parse', '--verify', `${upstreamRef}^{commit}`], {
+    encoding: 'utf8',
+  }).trim()
+  try {
+    runGit('git', ['merge-base', '--is-ancestor', baseCommit, sha])
+  } catch (cause) {
+    throw new Error(`Upstream tag ${upstreamTag} is not an ancestor of selected commit ${sha}, or ancestry could not be checked.`, { cause })
+  }
+  return baseCommit
+}
+
 function main() {
-  const { UPSTREAM_TAG, NH_TAG, GITHUB_REPOSITORY, GITHUB_SHA, GITHUB_OUTPUT } = process.env
+  const { UPSTREAM_TAG, UPSTREAM_REPOSITORY, NH_TAG, GITHUB_REPOSITORY, GITHUB_SHA, GITHUB_OUTPUT } = process.env
   const result = resolveReleaseVersion(UPSTREAM_TAG, NH_TAG, GITHUB_REPOSITORY)
   if (!GITHUB_SHA || !GITHUB_OUTPUT) {
     throw new Error('Run this entrypoint in GitHub Actions with GITHUB_SHA and GITHUB_OUTPUT.')
   }
 
-  // Use the exact supplied tag and the selected commit, never the newest tag
-  // in the repository or the current tip of a branch that may have moved.
-  const baseCommit = execFileSync('git', ['rev-parse', '--verify', `refs/tags/${UPSTREAM_TAG}^{commit}`], {
-    encoding: 'utf8',
-  }).trim()
-  execFileSync('git', ['merge-base', '--is-ancestor', baseCommit, GITHUB_SHA])
+  // Fetch only the exact base tag from upstream without overwriting fork tags.
+  resolveUpstreamBase(UPSTREAM_REPOSITORY, UPSTREAM_TAG, GITHUB_SHA)
 
   const existingTag = spawnSync('git', ['show-ref', '--verify', '--quiet', `refs/tags/${result.release_tag}`])
   if (existingTag.status === 0) {
