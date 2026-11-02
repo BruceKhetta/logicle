@@ -1,14 +1,10 @@
-name: Publish fork release (manual)
+name: Publish fork image (manual)
 
 on:
   workflow_dispatch:
     inputs:
-      upstream_tag:
-        description: 'Existing upstream base tag included in this branch (e.g. v0.36.0)'
-        required: true
-        type: string
-      nh_tag:
-        description: 'Fork suffix (e.g. 1 or satellite-fix); produces 0.36.0-nh-1'
+      tag:
+        description: 'Image tag to publish (e.g. 1.0.1)'
         required: true
         type: string
 
@@ -16,55 +12,32 @@ permissions:
   contents: read
 
 concurrency:
-  group: fork-release-${{ inputs.upstream_tag }}-nh-${{ inputs.nh_tag }}
+  group: fork-image-${{ inputs.tag }}
   cancel-in-progress: false
 
 jobs:
-  version:
-    if: github.repository == 'BruceKhetta/logicle'
-    runs-on: ubuntu-latest
-    outputs:
-      image: ${{ steps.resolve.outputs.image }}
-      version: ${{ steps.resolve.outputs.version }}
-      release_tag: ${{ steps.resolve.outputs.release_tag }}
-    steps:
-      - name: Checkout selected commit and tags
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Resolve and validate release version
-        id: resolve
-        env:
-          UPSTREAM_REPOSITORY: logicleai/logicle
-          UPSTREAM_TAG: ${{ inputs.upstream_tag }}
-          NH_TAG: ${{ inputs.nh_tag }}
-        run: node .github/scripts/release-version.mjs
-
   tests:
-    needs: version
+    if: github.repository == 'BruceKhetta/logicle'
     permissions:
       contents: read
       packages: read
     uses: ./.github/workflows/ci.yml
 
   publish:
-    needs: [version, tests]
+    needs: tests
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       packages: write
     steps:
       - name: Checkout tested commit
         uses: actions/checkout@v6
         with:
           ref: ${{ github.sha }}
+
+      - name: Resolve registry path
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -77,35 +50,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push fork image
-        id: image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ needs.version.outputs.image }}:${{ needs.version.outputs.version }}
+          tags: ${{ steps.image.outputs.name }}:${{ inputs.tag }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ needs.version.outputs.version }}
+            org.opencontainers.image.version=${{ inputs.tag }}
           cache-from: type=gha,scope=docker-build
           cache-to: type=gha,mode=min,scope=docker-build
-          build-args: APP_VERSION=${{ needs.version.outputs.version }}
-
-      - name: Create fork tag and GitHub Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ needs.version.outputs.release_tag }}
-          IMAGE: ${{ needs.version.outputs.image }}
-          VERSION: ${{ needs.version.outputs.version }}
-          DIGEST: ${{ steps.image.outputs.digest }}
-          UPSTREAM_TAG: ${{ inputs.upstream_tag }}
-        run: |
-          set -euo pipefail
-          printf 'Upstream base: `%s`\n\nCommit: `%s`\n\nImage: `%s:%s`\n\nDigest: `%s@%s`\n' \
-            "$UPSTREAM_TAG" "$GITHUB_SHA" "$IMAGE" "$VERSION" "$IMAGE" "$DIGEST" > release-notes.md
-          gh release create "$RELEASE_TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
-            --title "$RELEASE_TAG" \
-            --notes-file release-notes.md \
-            --latest=false
+          build-args: APP_VERSION=${{ inputs.tag }}

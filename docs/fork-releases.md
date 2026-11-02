@@ -1,62 +1,48 @@
-# Fork CI and manual releases
+# Fork CI and manual image publication
 
-This fork publishes container images to `ghcr.io/brucekhetta/logicle` and
-GitHub Releases to `BruceKhetta/logicle`. It does not publish charts, Docker
-Hub images, or coverage to GitHub Pages. Existing chart sources are retained
-for future use; no chart package is published by the workflows.
+This fork publishes container images to `ghcr.io/brucekhetta/logicle`.
+The workflows do not create Git tags or GitHub Releases, or publish charts,
+Docker Hub images, or coverage to GitHub Pages.
 
 ## Tests
 
-`Basic CI` runs on pushes, can be started manually, and is reused by the
-release workflow. It checks release-version validation, provider mocks, TypeScript types, the frontend bundle budget, unit
-coverage, and Docker smoke/integration tests using SQLite and PostgreSQL.
+`Basic CI` runs on every push, can be started manually, and is reused by the
+image publication workflow. It checks provider mocks, TypeScript types,
+the frontend bundle budget, unit coverage, and Docker smoke/integration
+tests using SQLite and PostgreSQL.
 Coverage is available as the `coverage` workflow artifact.
 
 The separate manual live-provider workflow requires the fork's own provider
-credentials; ordinary CI and release validation use mocked providers.
+credentials; ordinary CI uses mocked providers.
 
-## Publish a version
+## Publish an image
 
-After these workflow changes are available on the fork's default branch,
-open **Actions → Publish fork release (manual) → Run workflow**. Select the
-branch containing the changes to publish and supply:
+Open **Actions → Publish fork image (manual) → Run workflow**. Select the
+branch containing the changes to publish and supply the single input `tag`,
+for example `1.0.1`.
 
-| Input | Example | Meaning |
-| --- | --- | --- |
-| `upstream_tag` | `v0.36.0` | Exact existing upstream base tag included in the selected commit's history. |
-| `nh_tag` | `1` | Manual fork suffix; lowercase letters and numbers, with dots or hyphens as separators. |
+The supplied value is used unchanged for the image tag and `APP_VERSION`:
 
-This example produces:
+- Container image: `ghcr.io/brucekhetta/logicle:1.0.1`.
+- Application version: `1.0.1`.
 
-- Image and application version: `0.36.0-nh-1`.
-- Container image: `ghcr.io/brucekhetta/logicle:0.36.0-nh-1`.
-- Git tag and GitHub Release: `v0.36.0-nh-1`.
+There is no upstream lookup, ancestry check, SemVer validation, automatic
+prefix or suffix, or check for an existing tag. Docker and the registry
+apply their normal image-tag constraints. Publishing the same tag again
+updates it to the newly built image.
 
-The workflow validates inputs and fetches the exact base tag from
-`logicleai/logicle` into `refs/release-validation/upstream-base`, without
-overwriting or requiring a matching tag in the fork. It verifies that the upstream tag is an ancestor
-of the selected commit, and refuses an existing fork release tag. It runs
-the complete CI before building and publishing the image. The GitHub Release
-then records the selected commit, upstream base and published image digest.
-All jobs use the same selected commit, even if the branch moves during the run.
+The workflow runs the complete CI before building and publishing the image.
+All jobs use the selected commit, even if the branch moves during the run.
+Publication jobs only run in `BruceKhetta/logicle`. GHCR paths are normalized
+to lowercase. Publication uses the fork's `GITHUB_TOKEN` with `packages: write`
+and `contents: read`; no Docker Hub credentials are needed.
 
-The workflow only runs publication jobs in `BruceKhetta/logicle`. GHCR paths
-are normalized to lowercase. Publication uses the fork's `GITHUB_TOKEN` with
-`packages: write` and `contents: write`; no Docker Hub credentials are needed.
-GitHub Actions and package/release writes must be permitted by the repository
-and account policies. Newly published package visibility must be configured
-on GitHub if anonymous pulls are required.
+## Promote an image to latest
 
-`0.36.0-nh-1` has SemVer prerelease syntax. Neither the container's `latest`
-tag nor GitHub's latest-release designation is updated automatically. To
-promote a tested image, manually run **Promote fork image to latest (manual)**
-with `version: 0.36.0-nh-1` (without the `v` prefix). This updates only the
-fork's GHCR `latest` tag.
-
-Image publication and GitHub Release creation are separate operations. If
-the image push succeeds but release creation fails, the image can already
-exist; inspect the failed step before retrying. Choose a new suffix for a
-new release instead of overwriting an existing release tag.
+To promote a published image, manually run
+**Promote fork image to latest (manual)** with `version: 1.0.1`.
+This updates the fork's GHCR `latest` tag. Publishing an image does not
+otherwise update `latest` unless `latest` itself is supplied as the image tag.
 
 ## Upstream dependencies
 
