@@ -31,6 +31,9 @@ prefix or suffix, or check for an existing tag. Docker and the registry
 apply their normal image-tag constraints. Publishing the same tag again
 updates it to the newly built image.
 
+Each new application image tag includes `linux/amd64` and `linux/arm64`.
+Docker Desktop on Apple Silicon selects the ARM64 image automatically.
+
 The workflow runs the complete CI before building and publishing the image.
 All jobs use the selected commit, even if the branch moves during the run.
 Publication jobs only run in `BruceKhetta/logicle`. GHCR paths are normalized
@@ -44,11 +47,13 @@ To promote a published image, manually run
 This updates the fork's GHCR `latest` tag. Publishing an image does not
 otherwise update `latest` unless `latest` itself is supplied as the image tag.
 
-## Upstream dependencies
+## File analyzer
 
-The Dockerfile still reads the pinned public file-analyzer image
-`ghcr.io/logicleai/mcp-file-analyzer:0.11.0`. This is a build dependency, not a
-publication destination. Internal workspace package names also retain their
-existing scope. Neither causes a write or publication to the upstream project.
-The analyzer image can be replaced with a separately maintained mirror using
-the existing Docker build argument `FILE_ANALYZER_IMAGE` once that mirror exists.
+The application Dockerfile uses the fork's versioned analyzer image,
+`ghcr.io/brucekhetta/logicle:mcp-file-analyzer-1.0.0`. Docker selects the
+analyzer for each target platform and copies its launcher and Node.js runtime
+files into the application image. Users run a single Logicle container.
+
+The analyzer has its own version. To upgrade it, publish the new version with
+**Build and publish MCP file analyzer**, then update `FILE_ANALYZER_IMAGE` in
+the application Dockerfile.
