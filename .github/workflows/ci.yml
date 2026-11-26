@@ -2,6 +2,9 @@ name: Basic CI
 
 on:
   push:
+    # Release tags run this workflow through workflow_call, without duplicate CI.
+    branches:
+      - '**'
   workflow_dispatch:
   workflow_call:
 
